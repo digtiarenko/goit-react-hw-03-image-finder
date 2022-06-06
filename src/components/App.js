@@ -4,8 +4,8 @@ import SearchBar from './SearchBar';
 import ImageGallery from './ImageGallery';
 import Button from './Button';
 import Loader from './Loader';
-
-// import PropTypes from 'prop-types';
+import Modal from './Modal';
+import * as Api from './Services/Api';
 
 export class App extends Component {
   static propTypes = {};
@@ -15,6 +15,8 @@ export class App extends Component {
     page: 1,
     searchQuery: '',
     status: 'idle',
+    modalUrl: '',
+    error: null,
   };
 
   handleSearchQuery = searchQuery => {
@@ -30,25 +32,17 @@ export class App extends Component {
 
   fetchImages = () => {
     const { searchQuery, page } = this.state;
-    const Api = '27492943-191b6e85ce2b26a7ce823ae12';
+
     this.setState({ status: 'pending' });
 
-    return fetch(
-      `https://pixabay.com/api/?image_type=photo&orientation=horizontal&q=${searchQuery}&page=${page}&per_page=24&key=${Api}`,
-    )
-      .then(response => response.json())
-      .then(data => {
-        if (data.total === 0) {
-          return Promise.reject(
-            new Error(
-              `U've been looking for ${searchQuery}. We don't have such pictures`,
-            ),
-          );
-        } else {
-          return this.handleHits(data.hits);
-        }
-      })
-      .catch(error => console.log(error));
+    Api.fetchImages({ searchQuery, page })
+      .then(hits => this.handleHits(hits))
+      .catch(error => this.handleError(error));
+  };
+
+  handleError = error => {
+    console.log(error);
+    this.setState({ error });
   };
 
   handleHits = hits => {
@@ -65,6 +59,7 @@ export class App extends Component {
       result: [...prevState.result, ...normalizedHits],
       page: prevState.page + 1,
       status: 'resolved',
+      error: null,
     }));
   };
 
@@ -72,15 +67,26 @@ export class App extends Component {
     this.fetchImages();
   };
 
+  openModal = modalSrc => {
+    this.setState({
+      modalUrl: modalSrc,
+    });
+  };
+  closeModal = () => {
+    this.setState({
+      modalUrl: '',
+    });
+  };
+
   render() {
+    const { status, result, modalUrl } = this.state;
     return (
       <div>
         <SearchBar onSubmit={this.handleSearchQuery} />
-        {this.state.status === 'pending' && <Loader />}
-        <ImageGallery pictures={this.state.result} />
-        {this.state.result.length > 0 && (
-          <Button onClick={this.handleLoadMore} />
-        )}
+        {status === 'pending' && <Loader />}
+        <ImageGallery pictures={result} onClickImg={this.openModal} />
+        {status === 'resolved' && <Button onClick={this.handleLoadMore} />}
+        {modalUrl && <Modal src={modalUrl} onClick={this.closeModal} />}
       </div>
     );
   }

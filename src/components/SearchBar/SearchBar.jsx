@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
 import styles from './SearchBar.module.css';
+import PropTypes from 'prop-types';
 
 export class SearchBar extends Component {
-  static propTypes = {};
+  static propTypes = { onSubmit: PropTypes.func.isRequired };
+
   state = {
     input: '',
   };
@@ -14,6 +16,10 @@ export class SearchBar extends Component {
 
   handleSubmit = event => {
     event.preventDefault();
+
+    if (this.state.input.trim() === '') {
+      return alert('Please specify tour search');
+    }
     this.props.onSubmit(this.state.input);
     this.setState({ input: '' });
   };

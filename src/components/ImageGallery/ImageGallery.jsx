@@ -4,7 +4,7 @@ import styles from './ImageGallery.module.css';
 
 import React from 'react';
 
-function ImageGallery({ pictures }) {
+function ImageGallery({ pictures, onClickImg }) {
   return (
     <ul className={styles.imageGallery}>
       {pictures.map(({ id, webformatURL, largeImageURL, tags }) => (
@@ -13,6 +13,7 @@ function ImageGallery({ pictures }) {
           href={largeImageURL}
           small={webformatURL}
           alt={tags}
+          onClick={onClickImg}
         />
       ))}
     </ul>
@@ -20,6 +21,7 @@ function ImageGallery({ pictures }) {
 }
 
 ImageGallery.propTypes = {
+  onClickImg: PropTypes.func.isRequired,
   pictures: PropTypes.array.isRequired,
 };
 
