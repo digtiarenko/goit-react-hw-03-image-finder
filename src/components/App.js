@@ -5,7 +5,7 @@ import ImageGallery from './ImageGallery';
 import Button from './Button';
 import Loader from './Loader';
 import Modal from './Modal';
-import * as Api from './Services/Api';
+import * as Api from '../Services/Api';
 
 export class App extends Component {
   static propTypes = {};
@@ -16,16 +16,17 @@ export class App extends Component {
     searchQuery: '',
     status: 'idle',
     modalUrl: '',
-    error: null,
   };
 
   handleSearchQuery = searchQuery => {
-    this.setState({ searchQuery, page: 1 });
+    this.setState({ searchQuery, page: 1, result: [] });
   };
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.searchQuery !== this.state.searchQuery) {
-      this.setState({ result: [] });
+    if (
+      prevState.searchQuery !== this.state.searchQuery ||
+      prevState.page !== this.state.page
+    ) {
       this.fetchImages();
     }
   }
@@ -41,8 +42,8 @@ export class App extends Component {
   };
 
   handleError = error => {
-    console.log(error);
-    this.setState({ error });
+    console.log(error.toString());
+    this.setState({ status: 'error' });
   };
 
   handleHits = hits => {
@@ -57,14 +58,13 @@ export class App extends Component {
 
     this.setState(prevState => ({
       result: [...prevState.result, ...normalizedHits],
-      page: prevState.page + 1,
       status: 'resolved',
       error: null,
     }));
   };
 
   handleLoadMore = () => {
-    this.fetchImages();
+    this.setState(prevState => ({ page: prevState.page + 1 }));
   };
 
   openModal = modalSrc => {
@@ -83,8 +83,10 @@ export class App extends Component {
     return (
       <div>
         <SearchBar onSubmit={this.handleSearchQuery} />
-        {status === 'pending' && <Loader />}
+        {status === 'error' && <h2> There're no such pics in our database</h2>}
         <ImageGallery pictures={result} onClickImg={this.openModal} />
+
+        {status === 'pending' && <Loader />}
         {status === 'resolved' && <Button onClick={this.handleLoadMore} />}
         {modalUrl && <Modal src={modalUrl} onClick={this.closeModal} />}
       </div>

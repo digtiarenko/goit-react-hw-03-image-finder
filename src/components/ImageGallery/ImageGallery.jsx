@@ -22,7 +22,12 @@ function ImageGallery({ pictures, onClickImg }) {
 
 ImageGallery.propTypes = {
   onClickImg: PropTypes.func.isRequired,
-  pictures: PropTypes.array.isRequired,
+  pictures: PropTypes.array.shape({
+    alt: PropTypes.string.isRequired,
+    href: PropTypes.string.isRequired,
+    onClick: PropTypes.func.isRequired,
+    small: PropTypes.string.isRequired,
+  }),
 };
 
 export default ImageGallery;
