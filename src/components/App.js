@@ -84,8 +84,9 @@ export class App extends Component {
       <div>
         <SearchBar onSubmit={this.handleSearchQuery} />
         {status === 'error' && <h2> There're no such pics in our database</h2>}
-        <ImageGallery pictures={result} onClickImg={this.openModal} />
-
+        {result.length > 0 && (
+          <ImageGallery pictures={result} onClickImg={this.openModal} />
+        )}
         {status === 'pending' && <Loader />}
         {status === 'resolved' && <Button onClick={this.handleLoadMore} />}
         {modalUrl && <Modal src={modalUrl} onClick={this.closeModal} />}
